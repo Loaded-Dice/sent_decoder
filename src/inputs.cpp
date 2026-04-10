@@ -29,7 +29,7 @@ void handleInputs(){
   if(encRotVal < encRotValLast && delta > 0){delta = -1;}
   if(delta <= -2 || delta >= 2){
     enc.rotFlag = true;
-    enc.delta = (delta <= -2) ? enc.delta +1 : enc.delta -1 ;
+    enc.delta = (delta <= -2) ? enc.delta -1 : enc.delta +1 ;
     delta = 0; 
     }
 

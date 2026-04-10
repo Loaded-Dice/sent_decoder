@@ -50,7 +50,8 @@ void serialHandler(String msg){
 }
 
 void periodicUART(){
-  // Handle new command system continuous output
+//EVERY_N_MILLIS(500){  Serial.print(getSerialStatus());Serial.print("\t"); Serial.println( getSignalStatus()); return;}
+
   sendContinuousOutput();
   
   // Check if frame info should be sent
@@ -141,14 +142,18 @@ void chkStateUpdates(){
 void shortGuard(){
   static bool faultLast = HIGH;  
   EVERY_N_MILLIS(100){
-  bool fault = digitalRead(FAULT_PIN);
-  if(fault == LOW && faultLast != fault ){
-    errorMsg("Kurzschluss 5V zu Gnd!");
-    faultLast = fault; resetSensor(); 
-    sig.ovc_protect_ms = millis()+15000; 
-    sig.supplyVoltage = false; 
-    sig.overcurrent = true;
-    } 
-    
+    bool fault = digitalRead(FAULT_PIN);
+    if(fault == LOW && faultLast == HIGH){
+      errorMsg("Kurzschluss 5V zu Gnd!");
+      resetSensor(); 
+      sig.ovc_protect_ms = millis()+15000; 
+      sig.supplyVoltage = false; 
+      sig.overcurrent = true;
+    }
+    else if(fault == HIGH && faultLast == LOW){
+      sig.overcurrent = false;
+    }
+
+    faultLast = fault;
   }
 }

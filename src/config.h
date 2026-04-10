@@ -9,7 +9,7 @@
 #include "soc/gpio_reg.h"
 #include "driver/gpio.h"
 #include <driver/pulse_cnt.h>
-#include "FastLED_timers.h"
+#include <FastLED.h>
 #include <ArduinoJson.h>
 
 #define SIZE(A) sizeof(A) / sizeof(A[0])

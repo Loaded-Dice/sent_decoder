@@ -49,6 +49,9 @@ void displayIdentifier() {
 void chkTft(){
 }
 
+int dashSel = 0;
+
+
 void tftMain(){
   static uint8_t tftStateCurrent = TFTSTATE_OFF;
   static unsigned long tftTimeout = 0;
@@ -64,6 +67,9 @@ void tftMain(){
     EVERY_N_MILLIS(50){ drawMenu(initNewScreen);}      
   }
   else if(tftState == TFTSTATE_DASHBOARD){
+
+     if(getEncRot()){dashSel += getEncDelta();
+    }
     EVERY_N_MILLIS(200) { set_img(initNewScreen); }
     EVERY_N_MILLIS(100){drawValues();}
     }
@@ -126,13 +132,14 @@ String getEntryValue(uint8_t idx){
 }
 
 void menuBtnHandler(uint8_t idx){
+  bool vcc = sig.supplyVoltage;
   switch(idx){
-    case 0 :  
-      if(sig.supplyVoltage){resetSensor();} 
-      else{startSensor(); tftState = TFTSTATE_DASHBOARD; }  
-      break;
-    case 1 :  sig.supplyVoltage ? tftState = TFTSTATE_DASHBOARD : tftState = TFTSTATE_MENU; break ;
-    case 2 :  break ;
+    case 0 :  vcc ? resetSensor() : startSensor(); tftState = TFTSTATE_DASHBOARD; break;
+      // if(vcc){resetSensor();} 
+      // else{startSensor(); tftState = TFTSTATE_DASHBOARD; }  
+      // break;
+    case 1 :  vcc ? tftState = TFTSTATE_DASHBOARD : tftState = TFTSTATE_MENU; break ;
+    case 2 :  resetSensor(); if(vcc){ startSensor(); tftState = TFTSTATE_DASHBOARD ;}  break ;
     case 3 :  break ;
     case 4 :  break ;
     case 5 :  break ;
@@ -205,6 +212,9 @@ void drawArrow(int16_t x,int16_t y, uint32_t color){ tft.drawBitmap(  x,  y, img
 void set_img(){set_img(false);}
 
 void set_img(bool init){
+  //dispYoff
+  
+ 
   const uint16_t colorImpFrame = TFT_WHITE;
   const uint16_t colorImpDiag = TFT_WHITE;
   const uint16_t colorParseCh  = TFT_WHITE;
@@ -223,14 +233,8 @@ void set_img(bool init){
    const unsigned char  *imulseDiag      = nullptr;
    const unsigned char  *parseToCh       = nullptr;
 
-    if(sig.status == SIG_NONE){
-      impulsePerFrame = img_0_impulse;
-      imulseDiag = img_imp_no_signal;
-      }
-    else if(sig.status == SIG_DETECT){
-      imulseDiag = img_imp_detect;
-      impulsePerFrame = img_0_impulse;
-      }
+    if(sig.status == SIG_NONE){         impulsePerFrame = img_0_impulse;    imulseDiag = img_imp_no_signal;   }
+    else if(sig.status == SIG_DETECT){  imulseDiag = img_imp_detect;        impulsePerFrame = img_0_impulse;  }
 
     else if(sig.status == SIG_OK){ 
 
@@ -292,6 +296,10 @@ void set_img(bool init){
 }
 
 void drawValues(){
+  const int16_t xVal = 13;
+  uint16_t yLine = 75;
+  const uint16_t yDelta = 10;
+
 if(getEncBtn()){tftState = TFTSTATE_MENU;}  
   String buff = "";
   static float crc_tft = 0.0;
@@ -309,30 +317,18 @@ if(getEncBtn()){tftState = TFTSTATE_MENU;}
     tft.setTextSize(1);
     tft.setTextDatum(TL_DATUM);
     tft.setTextColor(TFT_WHITE,TFT_BLACK,true);
-    buff = "Ch1:  ";
-    buff += chValString(chFrame.ch1);
-    tft.drawString(buff,25,75);
-
-    buff = "Ch2:  ";
-    buff += chValString(chFrame.ch2);
-    tft.drawString(buff,25,85);
-
-    buff = "Supp: ";
-    buff += chValString( chFrame.ch_supp[0][0]);
-    tft.drawString(buff,25,95);
+    buff = "Ch1:  ";    buff += chValString(chFrame.ch1);    tft.drawString(buff,xVal,yLine);    yLine += yDelta;
+    buff = "Ch2:  ";    buff += chValString(chFrame.ch2);    tft.drawString(buff,xVal,yLine);    yLine += yDelta;
+    buff = "Supp: ";    buff += chValString( chFrame.ch_supp[0][0]);    tft.drawString(buff,xVal,yLine);    yLine += yDelta;
 
     if(fps_tft != count.frames_perSec){
       fps_tft = count.frames_perSec;
-      buff = "SENT FPS: ";
-      buff += String(fps_tft);
-      tft.drawString(buff,25,105);
+      buff = "SENT FPS: ";      buff += String(fps_tft);      tft.drawString(buff,xVal,yLine);      yLine += yDelta;
     }
     float crc_neu = (float)(10000 - (int)(count.crcFail_percent * 100)) / 100.0 ;
     if(crc_tft != crc_neu){
       crc_tft = crc_neu;
-      buff = "CRC ok[%]: ";
-      buff += String(crc_neu);
-      tft.drawString(buff,25,115);
+      buff = "CRC ok[%]: ";      buff += String(crc_neu);      tft.drawString(buff,xVal,yLine);      yLine += yDelta;
     }
 }
 
@@ -348,6 +344,7 @@ const String chValString(const Channel& ch) {
 uint16_t gray(uint8_t gscale){ return tft.color565(gscale,gscale, gscale);}
 
 void drawMonochromeBitmapAs(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, int colorWhite, int colorBlack) {
+  //y-= dispYoff;
   for (int16_t j = 0; j < h; j++) {
     for (int16_t i = 0; i < w; i += 8) {
       uint8_t byte = bitmap[j * (w / 8) + (i / 8)];

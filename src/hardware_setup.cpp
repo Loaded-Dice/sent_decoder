@@ -5,6 +5,7 @@
 #include "serial_comm.h"
 #include "periodic_tasks.h"
 #include "misc_functions.h"
+#include "led_status.h"
 
 void IRAM_ATTR sent_isr_handler(void* arg) {
   static uint32_t lastTicks = 0;
@@ -38,6 +39,7 @@ void core1_loop(void* pvParameters) {
   digitalWrite(ENABLE_PIN, AUTO_ENABLE_SENSOR);
   setupTft();
   init_pcnt();
+  initStatusLed();
   
   while (true) {
     processSignal();
@@ -48,6 +50,8 @@ void core1_loop(void* pvParameters) {
     serialRead();
     periodicUART();
     handleInputs();
+    EVERY_N_MILLIS(500){updateStatusLed(); }
+
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }
 }

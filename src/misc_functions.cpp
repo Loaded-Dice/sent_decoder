@@ -19,7 +19,7 @@ void resetSensor(){
 void startSensor(){
   if(digitalRead(ENABLE_PIN)) return;
   if(sig.ovc_protect_ms > millis()){ String msg ="#Reaktivierung möglich in " + String((sig.ovc_protect_ms - millis()) / 1000) + " Sekunden"; Serial.println(msg);}
-  else{ gpio_intr_enable(SENT_PIN);  digitalWrite(ENABLE_PIN,HIGH); sig.supplyVoltage = true; uartState = UART_NONE; clearRingBuff();}
+  else{ gpio_intr_enable(SENT_PIN);  digitalWrite(ENABLE_PIN,HIGH); sig.supplyVoltage = true; sig.overcurrent = false; uartState = UART_NONE; clearRingBuff();}
 }
 
 void detectSignal(){
