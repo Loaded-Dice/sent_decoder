@@ -50,7 +50,7 @@ void core1_loop(void* pvParameters) {
     serialRead();
     periodicUART();
     handleInputs();
-    EVERY_N_MILLIS(500){updateStatusLed(); }
+    updateStatusLed();
 
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }

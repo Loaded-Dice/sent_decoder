@@ -13,6 +13,7 @@ void set_img();
 void set_img(bool init);
 void chkTft();
 void displayIdentifier();
+void triggerPingScreen(uint32_t durationMs = 2500);
 
 // Menu functions
 void setMenuPos(uint8_t* selectPos, uint8_t* lineOff, int8_t posDelta, uint8_t arraySize, uint8_t maxLines);

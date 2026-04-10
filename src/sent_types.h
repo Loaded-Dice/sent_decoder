@@ -228,7 +228,7 @@ struct SentRevisionCode {
 
 extern SentRevisionCode sentRevisionCodes[];
 
-enum tftStates{TFTSTATE_OFF, TFTSTATE_LOGO , TFTSTATE_DASHBOARD, TFTSTATE_MENU };
+enum tftStates{TFTSTATE_OFF, TFTSTATE_LOGO , TFTSTATE_DASHBOARD, TFTSTATE_MENU, TFTSTATE_PING };
 extern uint8_t tftState;
 
 struct encObj {

@@ -18,6 +18,17 @@ uint16_t gray(uint8_t gscale);
 void drawMonochromeBitmapAs(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, int colorWhite, int colorBlack);
 void drawFrameDiff(int16_t x, int16_t y, const uint8_t* prev, const uint8_t* curr, int16_t w, int16_t h, uint16_t mask1 = TFT_WHITE, uint16_t mask0 = TFT_BLACK);
 
+static uint8_t pingReturnState = TFTSTATE_MENU;
+static uint32_t pingScreenEnd_ms = 0;
+
+void triggerPingScreen(uint32_t durationMs) {
+  if (tftState != TFTSTATE_PING) {
+    pingReturnState = tftState;
+  }
+  pingScreenEnd_ms = millis() + durationMs;
+  tftState = TFTSTATE_PING;
+}
+
 void displayIdentifier() {
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -63,6 +74,22 @@ void tftMain(){
   if(tftStateCurrent != tftState){ tft.fillScreen(TFT_BLACK); initNewScreen = true; tftStateCurrent = tftState;}
   
   if(tftState == TFTSTATE_LOGO){drawMonochromeBitmapAs(0, 0, img_SENT_Logo, 160, 128, TFT_WHITE,TFT_BLACK); tftTimeout = millis() + 1500; tftState = TFTSTATE_MENU; return; }
+  else if(tftState == TFTSTATE_PING){
+    if(initNewScreen){
+      tft.fillScreen(TFT_BLACK);
+      tft.setTextDatum(MC_DATUM);
+      tft.setTextColor(TFT_WHITE, TFT_BLACK);
+      tft.setTextSize(5);
+      tft.drawString("PING", 80, 64);
+      tft.drawString("PING", 81, 64);
+      tft.drawString("PING", 80, 65);
+      tft.drawString("PING", 81, 65);
+    }
+    if((int32_t)(millis() - pingScreenEnd_ms) >= 0){
+      tftState = pingReturnState;
+    }
+    return;
+  }
   else if(tftState == TFTSTATE_MENU){
     EVERY_N_MILLIS(50){ drawMenu(initNewScreen);}      
   }

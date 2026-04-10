@@ -6,5 +6,6 @@
 
 void initStatusLed();
 void updateStatusLed();
+void triggerPingLedBlink();
 
 #endif // LED_STATUS_H

@@ -9,7 +9,7 @@
 void parseAndExecuteCommand(String cmd);
 String validateCommand(String command, String param, UartCommandState& state, bool& vccOn, bool& vccOff,
                        bool& startCmd, bool& stopCmd, bool& getinfoCmd, bool& resetCmd, bool& restartCmd,
-                       bool& ovcCmd, bool& helpCmd, bool& identifyCmd);
+                       bool& ovcCmd, bool& helpCmd, bool& identifyCmd, bool& pingCmd);
 
 // Command handlers
 void cmd_vcc(String param);

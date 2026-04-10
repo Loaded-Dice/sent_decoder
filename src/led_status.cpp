@@ -5,6 +5,10 @@
 namespace {
 
 CRGB statusLed[1];
+bool pingBlinkActive = false;
+uint8_t pingBlinkStep = 0;
+uint32_t pingBlinkNext_ms = 0;
+CRGB pingRestoreColor = CRGB::Black;
 
 enum LedState : uint8_t {
   LED_BLUE = 0,
@@ -44,6 +48,25 @@ void initStatusLed() {
 
 void updateStatusLed() {
   static LedState lastState = static_cast<LedState>(255);
+  const uint32_t now = millis();
+
+  if (pingBlinkActive) {
+    if (now >= pingBlinkNext_ms) {
+      const bool ledOn = (pingBlinkStep % 2) == 0;
+      statusLed[0] = ledOn ? CRGB(180, 0, 200) : CRGB::Black;
+      FastLED.show();
+      pingBlinkStep++;
+
+      if (pingBlinkStep >= 6) {
+        pingBlinkActive = false;
+        statusLed[0] = pingRestoreColor;
+        FastLED.show();
+      } else {
+        pingBlinkNext_ms = now + (ledOn ? 90 : 70);
+      }
+    }
+    return;
+  }
 
   const LedState newState = getLedState();
   if (newState == lastState) {
@@ -53,4 +76,11 @@ void updateStatusLed() {
   statusLed[0] = mapColor(newState);
   FastLED.show();
   lastState = newState;
+}
+
+void triggerPingLedBlink() {
+  pingRestoreColor = statusLed[0];
+  pingBlinkActive = true;
+  pingBlinkStep = 0;
+  pingBlinkNext_ms = millis();
 }

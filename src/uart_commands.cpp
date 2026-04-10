@@ -3,6 +3,8 @@
 #include "misc_functions.h"
 #include "json_output.h"
 #include "output.h"
+#include "display.h"
+#include "led_status.h"
 
 // Parse, validate and execute command string
 void parseAndExecuteCommand(String cmdLine) {
@@ -21,6 +23,7 @@ void parseAndExecuteCommand(String cmdLine) {
   bool ovcCmd = false;
   bool helpCmd = false;
   bool identifyCmd = false;
+  bool pingCmd = false;
   String errorMsg = "";
   
   // Parse all commands first
@@ -40,7 +43,7 @@ void parseAndExecuteCommand(String cmdLine) {
           // Validate previous command
           if (currentCmd.length() > 0) {
             String err = validateCommand(currentCmd, currentParam, newState, vccOn, vccOff, startCmd, stopCmd, 
-                                        getinfoCmd, resetCmd, restartCmd, ovcCmd, helpCmd, identifyCmd);
+                                        getinfoCmd, resetCmd, restartCmd, ovcCmd, helpCmd, identifyCmd, pingCmd);
             if (err.length() > 0) { errorMsg = err; break; }
           }
           currentCmd = token.substring(1);
@@ -56,7 +59,7 @@ void parseAndExecuteCommand(String cmdLine) {
   // Validate last command
   if (errorMsg.length() == 0 && currentCmd.length() > 0) {
     errorMsg = validateCommand(currentCmd, currentParam, newState, vccOn, vccOff, startCmd, stopCmd,
-                               getinfoCmd, resetCmd, restartCmd, ovcCmd, helpCmd, identifyCmd);
+                               getinfoCmd, resetCmd, restartCmd, ovcCmd, helpCmd, identifyCmd, pingCmd);
   }
   
   // Check for validation errors
@@ -91,6 +94,12 @@ void parseAndExecuteCommand(String cmdLine) {
   
   if (helpCmd) { cmd_help(); return; }
   if (identifyCmd) { infoMsgJson(IDENTIFY); return; }
+  if (pingCmd) {
+    triggerPingLedBlink();
+    #ifdef DISPLAY_ACTIVE
+    triggerPingScreen(2500);
+    #endif
+  }
   
   infoMsgJson("OK");
 }
@@ -98,7 +107,7 @@ void parseAndExecuteCommand(String cmdLine) {
 // Validate single command and update state
 String validateCommand(String command, String param, UartCommandState& state, bool& vccOn, bool& vccOff,
                        bool& startCmd, bool& stopCmd, bool& getinfoCmd, bool& resetCmd, bool& restartCmd,
-                       bool& ovcCmd, bool& helpCmd, bool& identifyCmd) {
+                       bool& ovcCmd, bool& helpCmd, bool& identifyCmd, bool& pingCmd) {
   command.toLowerCase();
   param.toLowerCase();
   
@@ -145,6 +154,10 @@ String validateCommand(String command, String param, UartCommandState& state, bo
   } 
   else if (command == "help") { helpCmd = true; } 
   else if (command == "identify") { identifyCmd = true; } 
+  else if (command == "ping") {
+    if (param.length() == 0) { pingCmd = true; }
+    else { return "Invalid parameter for -ping (use: -ping)"; }
+  }
   else { return "Unknown command: -" + command; }
   
   return "";
@@ -165,6 +178,7 @@ void cmd_help() {
     "-delay <ms>       Ausgabe-Intervall (50-10000ms, default:200)\n"
     "-ovc reset        Overcurrent Protection zurücksetzen\n"
     "-identify         Decoder-Identifikation anzeigen\n"
+    "-ping             LED blinkt 3x lila, TFT zeigt 2.5s PING, dann Rückkehr\n"
     "-help             Diese Hilfe anzeigen\n"
     "\n"
     "Beispiel: -vcc on -ch1 val -ch2 raw -delay 100 -start";
