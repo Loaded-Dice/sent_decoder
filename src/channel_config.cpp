@@ -101,3 +101,16 @@ void setChConfig(ChannelConfig * cfg, uint16_t code12bit) {
     case 0x0B7: cfg->ch1.type = ch_ratio_encoding;           cfg->ch1.depth = 12; cfg->ch2.type = ch_pressure_lin;      cfg->ch2.depth = 12; cfg->nibbles = 6; break;
   }
 }
+
+
+/*
+Sensor Type: "Pressure Sensor", "MAF Sensor", "Temperature Sensors, "Position Sensor", "Ratio Sensor", "Acceleration Sensor"
+
+Fast Ch Type : Pressure
+Ch Characteristic 
+Supp. Ch Type :
+
+Frame Format
+//Nibble to ch assignment
+
+*/
