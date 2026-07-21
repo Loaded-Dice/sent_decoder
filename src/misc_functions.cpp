@@ -1,10 +1,12 @@
 #include "misc_functions.h"
 #include "output.h"
+#include "analyze.h"
 
 void resetSensor(){
   digitalWrite(ENABLE_PIN,LOW); 
   gpio_intr_disable(SENT_PIN);
   clearRingBuff();
+  resetCollectSerialMsg();
   digitalWrite(ENABLE_PIN,LOW); 
   sig.supplyVoltage = false;
   sig.serialStatus = SENT_SER_NONE;
@@ -19,15 +21,17 @@ void resetSensor(){
 void startSensor(){
   if(digitalRead(ENABLE_PIN)) return;
   if(sig.ovc_protect_ms > millis()){ String msg ="#Reaktivierung möglich in " + String((sig.ovc_protect_ms - millis()) / 1000) + " Sekunden"; Serial.println(msg);}
-  else{ gpio_intr_enable(SENT_PIN);  digitalWrite(ENABLE_PIN,HIGH); sig.supplyVoltage = true; sig.overcurrent = false; uartState = UART_NONE; clearRingBuff();}
+  else{ gpio_intr_enable(SENT_PIN);  digitalWrite(ENABLE_PIN,HIGH); sig.supplyVoltage = true; sig.overcurrent = false; uartState = UART_NONE; sig.vccOnTime_ms = millis(); clearRingBuff();}
 }
 
 void detectSignal(){
   uartState = UART_NONE;
   sig.serialStatus = SENT_SER_NONE;
   sig.status = SIG_NONE;
+  sig.vccOnTime_ms = 0;
   unique = 0;
   memset(&uniqueIds, 0, sizeof(uniqueIds)); unique = 0;
+  resetCollectSerialMsg();
   clearRingBuff();
 }
 

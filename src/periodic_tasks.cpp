@@ -5,6 +5,7 @@
 #include "display.h"
 #include "uart_commands.h"
 #include "json_output.h"
+#include "analyze.h"
 
 bool acknowledge = false;
 
@@ -108,7 +109,15 @@ void calcStats(){
     count.pulse_perSec = !ok ? 0 : count.frames_perSec * sig.numPulses;
     if(count.pulse_perSec != 0){count.pulseSkip_percent = count.pulseSkip * 100 / count.pulse_perSec;}
     else{count.pulseSkip_percent = 0;}
-    if(count.crcFail > count.crcOk){sig.status = SIG_DETECT; clearRingBuff();}
+    if(count.crcFail > count.crcOk){
+      sig.status = SIG_NONE;
+      sig.vccOnTime_ms = 1;  // non-zero but far in past: warmup already passed
+      sig.serialStatus = SENT_SER_NONE;
+      unique = 0;
+      memset(&uniqueIds, 0, sizeof(uniqueIds));
+      resetCollectSerialMsg();
+      clearRingBuff();
+    }
     count.crcOk = 0;
     count.crcFail = 0;
     count.frames = 0;

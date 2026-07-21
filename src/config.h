@@ -38,6 +38,7 @@
 #define TIMER_CLK_DIV 2
 
 #define AUTO_ENABLE_SENSOR false
+#define VCC_WARMUP_MS 100
 #define LEDDATA_PIN 23
 #define ENCA_PIN 39
 #define ENCB_PIN 34

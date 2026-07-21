@@ -19,10 +19,23 @@ void processSignal() {
 
   uint32_t ringBuffSpan = getBuffSpan(localHead,localTail,RING_BUFFER_SIZE);
 
-  if(sig.status == SIG_NONE && ringBuffSpan > 100){ sig.status = SIG_DETECT; clearRingBuff(); }
+  // Discard startup transients during VCC warmup period
+  if(sig.status == SIG_NONE && sig.vccOnTime_ms > 0 && millis() < sig.vccOnTime_ms + VCC_WARMUP_MS){
+    if(ringBuffSpan > 100){ clearRingBuff(); }
+    lastHead = localHead;
+    return;
+  }
+
+  if(sig.status == SIG_NONE && ringBuffSpan > 100){
+    // First pulse detected: start warmup timer if not already running
+    if(sig.vccOnTime_ms == 0){ sig.vccOnTime_ms = millis(); }
+    // Wait out the warmup before switching to SIG_DETECT
+    if(millis() < sig.vccOnTime_ms + VCC_WARMUP_MS){ clearRingBuff(); lastHead = localHead; return; }
+    sig.status = SIG_DETECT; clearRingBuff();
+  }
 
   else if(sig.status == SIG_DETECT){
-    if(ringBuffSpan < DETECT_BUFFER_SIZE/2){
+    if(ringBuffSpan < DETECT_BUFFER_SIZE){
       if(millis() > sig.lastPulseTime_ms + 3000){ sig.status = SIG_NONE; clearRingBuff();}
       return;
     }

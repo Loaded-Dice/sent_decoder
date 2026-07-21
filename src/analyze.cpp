@@ -68,6 +68,14 @@ bool processDetect(uint16_t detectSize) {
     sig.tickNominal_us = round((float)sig.tickLen  / ESP_TICKS_PER_US);
     sig.syncNominal_ticks = sig.syncNominal_us * ESP_TICKS_PER_US;
     sig.tickNominal_ticks = sig.tickNominal_us * ESP_TICKS_PER_US;
+
+    // Plausibility check: rounded tick nominal must reconstruct sync within 15%.
+    // Catches false detections at half/double the real sync length (e.g. 84.7µs instead of 169µs).
+    uint32_t expectedSyncTicks = (uint32_t)sig.tickNominal_ticks * 56;
+    int32_t syncError = (int32_t)expectedSyncTicks - (int32_t)syncMedian;
+    if (syncError < 0) syncError = -syncError;
+    if (syncError * 100 > (int32_t)syncMedian * 15) return false;
+
     sig.frameLen = 0;
     for (uint8_t i = 0; i < f_pulses; i++) { sig.frameLen += detect[bestIdx + i]; }
     sig.numPulses = f_pulses;
@@ -115,12 +123,20 @@ sentFrame analyzeFramePulses(BUFF_T * ptr, bool localSync){
   return frame;
 }
 
+static bool s_resetCollectSerial = false;
+
+void resetCollectSerialMsg() {
+  s_resetCollectSerial = true;
+}
+
 void collectSerialMsg(uint8_t status) {
 
   static uint32_t bit2 = 0;
   static uint32_t bit3 = 0;
   bool newSentSerial = false;
   static uint32_t crcEnhanced = 0;
+
+  if (s_resetCollectSerial) { bit2 = 0; bit3 = 0; crcEnhanced = 0; s_resetCollectSerial = false; }
   
   bit2 = (bit2 << 1) | ((status >> 2) & 0x01);
   bit3 = (bit3 << 1) | ((status >> 3) & 0x01);

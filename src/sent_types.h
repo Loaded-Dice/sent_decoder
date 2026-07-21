@@ -50,7 +50,8 @@ struct signalCtrl {
   uint32_t syncNominal_ticks = 0;
   uint32_t tickNominal_ticks = 0;
   uint32_t lastSyncTime_ms = 0;
-  uint32_t lastPulseTime_ms = 0; 
+  uint32_t lastPulseTime_ms = 0;
+  uint32_t vccOnTime_ms = 0;
 }; 
 
 extern signalCtrl sig;

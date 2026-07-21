@@ -12,6 +12,7 @@ bool processDetect(uint16_t detectSize);
 // Frame analysis
 sentFrame analyzeFramePulses(BUFF_T* ptr, bool localSync);
 void collectSerialMsg(uint8_t status);
+void resetCollectSerialMsg();
 void parseToCh(sentFrame raw);
 
 // Nibble combining functions
