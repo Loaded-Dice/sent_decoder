@@ -125,13 +125,13 @@ void jsonSentValues(){
 
 void chValJson(JsonObject obj, const Channel& ch) {
   if(ch.type == ch_zero || ch.type == ch_position_sensor_specific || ch.type == ch_position_multi_dim || ch.valTrans == VALTRANS_NONE){
-    obj["RAW"] = getCodeAsHex(ch.raw);
-    obj["unit"] = ch.unit;
+    obj["RAW"] = getValAs0xHex(ch.raw,ch.depth);
+
   }
   else{
     obj["Val"] = ch.value;
     obj["unit"] = ch.unit;
-    obj["RAW"] = getCodeAsHex(ch.raw);
+    obj["RAW"] = getValAs0xHex(ch.raw,ch.depth);
   }
 }
 
