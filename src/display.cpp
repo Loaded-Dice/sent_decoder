@@ -340,28 +340,29 @@ if(getEncBtn()){tftState = TFTSTATE_MENU;}
   else if(chFrame.ch1.depth == 12 && chFrame.nibbles == 4 && chFrame.ch2.type == ch_undefined){ch1_x = 21; ch2_x = 0;}
   else if(chFrame.ch1.depth == 14 && chFrame.ch2.depth == 10 && chFrame.nibbles == 6 ){ ch1_x = 22; ch2_x = 61 ;}
   else if(chFrame.ch1.depth == 16 && chFrame.ch2.depth == 8  && chFrame.nibbles == 6 ){ ch1_x = 25; ch2_x = 8;}
-
+    
     tft.setTextSize(1);
     tft.setTextDatum(TL_DATUM);
     tft.setTextColor(TFT_WHITE,TFT_BLACK,true);
-    buff = "Ch1:  ";    buff += chValString(chFrame.ch1);    tft.drawString(buff,xVal,yLine);    yLine += yDelta;
-    buff = "Ch2:  ";    buff += chValString(chFrame.ch2);    tft.drawString(buff,xVal,yLine);    yLine += yDelta;
-    buff = "Supp: ";    buff += chValString( chFrame.ch_supp[0][0]);    tft.drawString(buff,xVal,yLine);    yLine += yDelta;
-
+    buff = "Ch1:  ";    buff += chValString(chFrame.ch1); buff+="               "; tft.drawString(buff.substring(0,21),xVal,yLine);    yLine += yDelta;
+    buff = "Ch2:  ";    buff += chValString(chFrame.ch2); buff+="               "; tft.drawString(buff.substring(0,21),xVal,yLine);    yLine += yDelta;
+    buff = "Supp: ";    buff += chValString( chFrame.ch_supp[0][0]); buff+="               "; tft.drawString(buff.substring(0,21),xVal,yLine);    yLine += yDelta;
+    // 22 = max len  22 - strlen(buff)
+   // strncat ( buff, "               ", CLAMP(22 - buff.length(),0,22) );
     if(fps_tft != count.frames_perSec){
       fps_tft = count.frames_perSec;
-      buff = "SENT FPS: ";      buff += String(fps_tft);      tft.drawString(buff,xVal,yLine);      yLine += yDelta;
+      buff = "SENT FPS: ";      buff += String(fps_tft); buff+="               "; tft.drawString(buff.substring(0,21),xVal,yLine);      yLine += yDelta;
     }
     float crc_neu = (float)(10000 - (int)(count.crcFail_percent * 100)) / 100.0 ;
     if(crc_tft != crc_neu){
       crc_tft = crc_neu;
-      buff = "CRC ok[%]: ";      buff += String(crc_neu);      tft.drawString(buff,xVal,yLine);      yLine += yDelta;
+      buff = "CRC ok[%]: ";      buff += String(crc_neu);  buff+="               "; tft.drawString(buff.substring(0,21),xVal,yLine);      yLine += yDelta;
     }
 }
 
 const String chValString(const Channel& ch) {
   String result;
-    if(ch.type == ch_zero || ch.type == ch_position_sensor_specific || ch.type == ch_position_multi_dim || ch.valTrans == VALTRANS_NONE){ result = getCodeAsHex(ch.raw) + String(" Raw"); }
+    if(ch.type == ch_zero || ch.type == ch_position_sensor_specific || ch.type == ch_position_multi_dim || ch.valTrans == VALTRANS_NONE){ result = getValAs0xHex(ch.raw, ch.depth) + String(" Raw"); }
     else{   result = String(ch.value) + String(" ") + String(ch.unit); }
     return result;
 }

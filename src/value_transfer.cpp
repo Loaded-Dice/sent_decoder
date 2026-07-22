@@ -6,6 +6,17 @@
 void chooseTransferConfig(Channel * ch, String chName){
   transferCoeff tfc;
   bool configXneeded = true;
+
+  // A standard/high temperature channel uses a fixed transfer function and does
+  // not need X/Y nodes. If such a channel nonetheless reports X1/X2 and Y1/Y2,
+  // switch it to the special (linear) transfer over those nodes when enabled.
+  if(special_transf_when_XY_provided
+     && (ch->type == ch_temperature_lin_default || ch->type == ch_temperature_lin_high)
+     && ch->nodes.x1done && ch->nodes.x2done
+     && ch->nodes.y1done && ch->nodes.y2done){
+    ch->type = ch_temperature_lin_special;
+  }
+
   if     (ch->type == ch_pressure_lin           ){tfc = pressCoeff;}
   else if(ch->type == ch_temperature_lin_special){tfc = tempSpecialCoeff;}
   else if(ch->type == ch_MAF_lin                ){tfc = mafCoeff;}

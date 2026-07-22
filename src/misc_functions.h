@@ -30,4 +30,10 @@ uint8_t calculateCRC6(uint32_t crcEnhanced);
 // Debug utilities
 void printBin(uint32_t bin, uint8_t size);
 
+String getValAsHex(uint32_t val);
+String getValAs0xHex(uint32_t val);
+String getValAsHex(uint32_t val, uint8_t bit);
+String getValAs0xHex(uint32_t val, uint8_t bit);
+String getValAsHex(uint32_t val, uint8_t bit, bool prefix);
+
 #endif // MISC_FUNCTIONS_H

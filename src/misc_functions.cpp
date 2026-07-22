@@ -122,3 +122,27 @@ String getCodeAsHex(uint16_t code) {
     sprintf(hexString, "0x%03X", code & 0xFFF);
     return String(hexString);
 }
+
+String getValAsHex(uint32_t val){return getValAsHex(val,0,false); }
+String getValAs0xHex(uint32_t val){return getValAsHex(val,0,true); }
+String getValAsHex(uint32_t val, uint8_t bit){return getValAsHex(val,bit,false); }
+String getValAs0xHex(uint32_t val, uint8_t bit){return getValAsHex(val,bit,true); }
+
+String getValAsHex(uint32_t val, uint8_t bit, bool prefix) {
+
+    if( !IN_RANGE(bit, 4,32) && bit != 0) return "Error Print Range";
+    uint8_t len = ceil(bit / 4.0);
+    char hexString[12];
+    switch (len)    {
+      case 1:   sprintf(hexString, prefix ? "0x%01X" :  "%01X", val & 0xF);   break;
+      case 2:   sprintf(hexString, prefix ? "0x%02X" :  "%02X", val & 0xFF);   break;
+      case 3:   sprintf(hexString, prefix ? "0x%03X" :  "%03X", val & 0xFFF);   break;
+      case 4:   sprintf(hexString, prefix ? "0x%04X" :  "%04X", val & 0xFFFF);   break;
+      case 5:   sprintf(hexString, prefix ? "0x%05X" :  "%05X", val & 0xFFFFF);   break;
+      case 6:   sprintf(hexString, prefix ? "0x%06X" :  "%06X", val & 0xFFFFFF);   break;
+      case 7:   sprintf(hexString, prefix ? "0x%07X" :  "%07X", val & 0xFFFFFFF);   break;
+      case 8:   sprintf(hexString, prefix ? "0x%08X" :  "%08X", val & 0xFFFFFFFF);   break;
+      default:  sprintf(hexString, prefix ? "0x%X"   :  "%X", val);                   break;
+    }
+    return String(hexString);
+}
