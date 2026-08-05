@@ -255,18 +255,18 @@ void addChannelToJson(JsonObject obj, const Channel& ch, ChannelOutputMode mode)
   
   if (outOfRange) {
     // Always output RAW on error + send error message
-    obj["RAW"] = getCodeAsHex(ch.raw);
+    obj["RAW"] = getValAs0xHex(ch.raw, ch.depth);
     obj["unit"] = ch.unit;
     obj["error"] = "Out of range";
-    errorMsgJson("Channel out of range: RAW=" + getCodeAsHex(ch.raw));
+    errorMsgJson("Channel out of range: RAW=" + getValAs0xHex(ch.raw, ch.depth));
     return;
   }
   
   // Normal output based on mode
-  if (mode == CH_RAW) { obj["RAW"] = getCodeAsHex(ch.raw); obj["unit"] = ch.unit; } 
+  if (mode == CH_RAW) { obj["RAW"] = getValAs0xHex(ch.raw, ch.depth); obj["unit"] = ch.unit; } 
   else if (mode == CH_VAL) {
     // Try to output value, fallback to RAW if transfer function not available
-    if (ch.valTrans == VALTRANS_OK) { obj["Val"] = ch.value; obj["unit"] = ch.unit; obj["RAW"] = getCodeAsHex(ch.raw); } 
-    else { obj["RAW"] = getCodeAsHex(ch.raw); obj["unit"] = ch.unit; }
+    if (ch.valTrans == VALTRANS_OK) { obj["Val"] = ch.value; obj["unit"] = ch.unit; obj["RAW"] = getValAs0xHex(ch.raw, ch.depth); } 
+    else { obj["RAW"] = getValAs0xHex(ch.raw, ch.depth); obj["unit"] = ch.unit; }
   }
 }
